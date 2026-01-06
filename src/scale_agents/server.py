@@ -35,15 +35,29 @@ server = Server()
 
 
 def _classify_intent(text: str) -> str:
-    """Classify user intent to route to appropriate agent.
+    """Classify user intent to route to appropriate handler.
 
     Args:
         text: User message text.
 
     Returns:
-        Agent name to route to.
+        Handler name to route to.
     """
     text_lower = text.lower()
+
+    # Check for compound intents first (more specific patterns)
+    # "filesystem health" should go to health, not storage
+    if "filesystem" in text_lower and "health" in text_lower:
+        return "filesystem_health"
+    
+    # Storage related keywords (check before health since "filesystem" is storage)
+    storage_keywords = [
+        "filesystem", "fileset", "mount", "unmount", "pool",
+        "storage pool", "create fs", "delete fs", "link", "unlink",
+        "nsd", "disk", "list fs",
+    ]
+    if any(kw in text_lower for kw in storage_keywords):
+        return "storage"
 
     # Health related keywords
     health_keywords = [
@@ -52,15 +66,6 @@ def _classify_intent(text: str) -> str:
     ]
     if any(kw in text_lower for kw in health_keywords):
         return "health"
-
-    # Storage related keywords
-    storage_keywords = [
-        "filesystem", "fileset", "mount", "unmount", "pool",
-        "storage pool", "create fs", "delete fs", "link", "unlink",
-        "nsd", "disk",
-    ]
-    if any(kw in text_lower for kw in storage_keywords):
-        return "storage"
 
     # Quota related keywords
     quota_keywords = [
@@ -89,6 +94,35 @@ def _classify_intent(text: str) -> str:
 
     # Default to orchestrator for complex or unclear requests
     return "orchestrator"
+
+
+def _extract_filesystem_name(text: str) -> str | None:
+    """Extract filesystem name from user text.
+    
+    Looks for patterns like:
+    - "for fs1"
+    - "filesystem fs1"
+    - "fs fs1"
+    """
+    import re
+    
+    # Pattern: "for <name>" or "filesystem <name>" or "fs <name>"
+    patterns = [
+        r'\bfor\s+(\w+)',
+        r'\bfilesystem\s+(\w+)',
+        r'\bfs\s+(\w+)',
+        r'\bon\s+(\w+)',
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text.lower())
+        if match:
+            name = match.group(1)
+            # Filter out common words that aren't filesystem names
+            if name not in ["the", "a", "an", "all", "health", "status", "info"]:
+                return name
+    
+    return None
 
 
 async def _call_mcp_tool(
@@ -120,6 +154,31 @@ async def _call_mcp_tool(
     return {"result": str(result)}
 
 
+async def _handle_filesystem_health_request(
+    session: ClientSession,
+    user_text: str,
+) -> str:
+    """Handle filesystem health requests."""
+    fs_name = _extract_filesystem_name(user_text)
+    
+    try:
+        if fs_name:
+            # Get health states for specific filesystem
+            result = await _call_mcp_tool(
+                session, 
+                "get_filesystem_health_states", 
+                {"filesystem": fs_name}
+            )
+            return f"**Filesystem Health: {fs_name}**\n\n```json\n{_format_result(result)}\n```"
+        else:
+            # List filesystems first, then get health for each
+            fs_result = await _call_mcp_tool(session, "list_filesystems", {})
+            return f"**Available Filesystems** (specify one for health check)\n\n```json\n{_format_result(fs_result)}\n```"
+            
+    except Exception as e:
+        return f"**Error**: {e}"
+
+
 async def _handle_health_request(
     session: ClientSession,
     user_text: str,
@@ -128,21 +187,34 @@ async def _handle_health_request(
     user_lower = user_text.lower()
     
     try:
+        if "node" in user_lower:
+            if "status" in user_lower:
+                result = await _call_mcp_tool(session, "get_nodes_status", {})
+                return f"**Node Status**\n\n```json\n{_format_result(result)}\n```"
+            
+            if "health" in user_lower or "state" in user_lower:
+                result = await _call_mcp_tool(session, "get_node_health_states", {"name": ":all:"})
+                return f"**Node Health States**\n\n```json\n{_format_result(result)}\n```"
+            
+            if "event" in user_lower:
+                result = await _call_mcp_tool(session, "get_node_health_events", {"name": ":all:"})
+                return f"**Node Health Events**\n\n```json\n{_format_result(result)}\n```"
+            
+            # Default node info
+            result = await _call_mcp_tool(session, "get_nodes_status", {})
+            return f"**Node Status**\n\n```json\n{_format_result(result)}\n```"
+        
         if "cluster" in user_lower:
             result = await _call_mcp_tool(session, "list_clusters", {})
             return f"**Cluster Information**\n\n```json\n{_format_result(result)}\n```"
         
-        if "node" in user_lower and "status" in user_lower:
-            result = await _call_mcp_tool(session, "get_nodes_status", {})
-            return f"**Node Status**\n\n```json\n{_format_result(result)}\n```"
+        if "event" in user_lower:
+            result = await _call_mcp_tool(session, "get_node_health_events", {"name": ":all:"})
+            return f"**Health Events**\n\n```json\n{_format_result(result)}\n```"
         
-        if "node" in user_lower and "health" in user_lower:
-            result = await _call_mcp_tool(session, "get_node_health_states", {"name": ":all:"})
-            return f"**Node Health States**\n\n```json\n{_format_result(result)}\n```"
-        
-        # Default: cluster info
-        result = await _call_mcp_tool(session, "list_clusters", {})
-        return f"**Cluster Information**\n\n```json\n{_format_result(result)}\n```"
+        # Default: node health states
+        result = await _call_mcp_tool(session, "get_node_health_states", {"name": ":all:"})
+        return f"**Health Overview**\n\n```json\n{_format_result(result)}\n```"
         
     except Exception as e:
         return f"**Error**: {e}"
@@ -154,16 +226,30 @@ async def _handle_storage_request(
 ) -> str:
     """Handle storage-related requests."""
     user_lower = user_text.lower()
+    fs_name = _extract_filesystem_name(user_text)
     
     try:
-        if "filesystem" in user_lower or "list" in user_lower:
-            result = await _call_mcp_tool(session, "list_filesystems", {})
-            return f"**Filesystems**\n\n```json\n{_format_result(result)}\n```"
-        
         if "fileset" in user_lower:
-            # Try to extract filesystem name
-            result = await _call_mcp_tool(session, "list_filesystems", {})
-            return f"**Filesystems** (specify filesystem for filesets)\n\n```json\n{_format_result(result)}\n```"
+            if fs_name:
+                result = await _call_mcp_tool(session, "list_filesets", {"filesystem": fs_name})
+                return f"**Filesets in {fs_name}**\n\n```json\n{_format_result(result)}\n```"
+            else:
+                # List filesystems first
+                result = await _call_mcp_tool(session, "list_filesystems", {})
+                return f"**Filesystems** (specify one to list filesets)\n\n```json\n{_format_result(result)}\n```"
+        
+        if "pool" in user_lower:
+            if fs_name:
+                result = await _call_mcp_tool(session, "list_storage_pools", {"filesystem": fs_name})
+                return f"**Storage Pools in {fs_name}**\n\n```json\n{_format_result(result)}\n```"
+            else:
+                result = await _call_mcp_tool(session, "list_filesystems", {})
+                return f"**Filesystems** (specify one to list pools)\n\n```json\n{_format_result(result)}\n```"
+        
+        if fs_name:
+            # Get specific filesystem info
+            result = await _call_mcp_tool(session, "get_filesystem", {"filesystem": fs_name})
+            return f"**Filesystem: {fs_name}**\n\n```json\n{_format_result(result)}\n```"
         
         # Default: list filesystems
         result = await _call_mcp_tool(session, "list_filesystems", {})
@@ -178,10 +264,17 @@ async def _handle_quota_request(
     user_text: str,
 ) -> str:
     """Handle quota-related requests."""
+    fs_name = _extract_filesystem_name(user_text)
+    
     try:
-        # List filesystems first to show available options
+        if fs_name:
+            result = await _call_mcp_tool(session, "list_quotas", {"filesystem": fs_name})
+            return f"**Quotas for {fs_name}**\n\n```json\n{_format_result(result)}\n```"
+        
+        # List filesystems first
         result = await _call_mcp_tool(session, "list_filesystems", {})
-        return f"**Available Filesystems** (specify filesystem for quota info)\n\n```json\n{_format_result(result)}\n```"
+        return f"**Filesystems** (specify one for quota info)\n\n```json\n{_format_result(result)}\n```"
+        
     except Exception as e:
         return f"**Error**: {e}"
 
@@ -204,17 +297,25 @@ async def _handle_admin_request(
 ) -> str:
     """Handle admin-related requests."""
     user_lower = user_text.lower()
+    fs_name = _extract_filesystem_name(user_text)
     
     try:
         if "snapshot" in user_lower:
+            if fs_name:
+                result = await _call_mcp_tool(session, "list_snapshots", {"filesystem": fs_name})
+                return f"**Snapshots for {fs_name}**\n\n```json\n{_format_result(result)}\n```"
             result = await _call_mcp_tool(session, "list_filesystems", {})
-            return f"**Filesystems** (specify filesystem for snapshots)\n\n```json\n{_format_result(result)}\n```"
+            return f"**Filesystems** (specify one for snapshots)\n\n```json\n{_format_result(result)}\n```"
         
         if "remote" in user_lower and "cluster" in user_lower:
             result = await _call_mcp_tool(session, "list_remote_clusters", {})
             return f"**Remote Clusters**\n\n```json\n{_format_result(result)}\n```"
         
-        # Default: show cluster info
+        if "config" in user_lower:
+            result = await _call_mcp_tool(session, "get_admin_config", {})
+            return f"**Admin Configuration**\n\n```json\n{_format_result(result)}\n```"
+        
+        # Default: cluster info
         result = await _call_mcp_tool(session, "list_clusters", {})
         return f"**Cluster Information**\n\n```json\n{_format_result(result)}\n```"
         
@@ -254,8 +355,8 @@ async def scale_agent(
     Examples:
         "Show cluster health" -> Health handler
         "List all filesystems" -> Storage handler
+        "Check filesystem health for fs1" -> Filesystem health
         "What's the quota for fileset data01?" -> Quota handler
-        "Analyze performance bottlenecks" -> Performance handler
         "Create a snapshot of fs01" -> Admin handler
     """
     # Check MCP availability
@@ -284,7 +385,7 @@ async def scale_agent(
     # Classify intent
     intent = _classify_intent(user_text)
     
-    logger.debug(
+    logger.info(
         "routing_request",
         intent=intent,
         message_preview=user_text[:100] if user_text else "",
@@ -297,7 +398,9 @@ async def scale_agent(
                 await session.initialize()
                 
                 # Route to handler based on intent
-                if intent == "health":
+                if intent == "filesystem_health":
+                    result = await _handle_filesystem_health_request(session, user_text)
+                elif intent == "health":
                     result = await _handle_health_request(session, user_text)
                 elif intent == "storage":
                     result = await _handle_storage_request(session, user_text)
@@ -308,10 +411,9 @@ async def scale_agent(
                 elif intent == "admin":
                     result = await _handle_admin_request(session, user_text)
                 else:
-                    # Default: show available tools
-                    tools = await session.list_tools()
-                    tool_names = [t.name for t in tools.tools]
-                    result = f"**Available Operations**\n\n" + "\n".join(f"- {t}" for t in tool_names[:20])
+                    # Default: show cluster info
+                    cluster_result = await _call_mcp_tool(session, "list_clusters", {})
+                    result = f"**Cluster Overview**\n\n```json\n{_format_result(cluster_result)}\n```"
                 
                 yield AgentMessage(parts=[TextPart(text=result)])
                 
